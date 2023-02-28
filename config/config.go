@@ -1,6 +1,8 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
+	"log"
 	"os"
 )
 
@@ -12,9 +14,14 @@ type Configuration struct {
 	MigrateToVersion    string
 	MigrationLocation   string
 	FileStorageLocation string
+	RabbitURL           string
 }
 
 func GetConfiguration() Configuration {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Println(err)
+	}
 	migrationLocation, set := os.LookupEnv("MIGRATION_LOCATION")
 	if !set {
 		migrationLocation = "migrationsx"
@@ -35,5 +42,6 @@ func GetConfiguration() Configuration {
 		MigrateToVersion:    migrateToVersion,
 		MigrationLocation:   migrationLocation,
 		FileStorageLocation: staticFilesLocation,
+		RabbitURL:           os.Getenv("RABBIT_URL"),
 	}
 }

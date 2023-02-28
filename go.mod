@@ -5,8 +5,10 @@ go 1.19
 require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.15.2
+	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/pkg/errors v0.9.1
+	github.com/streadway/amqp v1.0.0
 	github.com/upper/db/v4 v4.6.0
 )
 
