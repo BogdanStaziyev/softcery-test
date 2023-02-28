@@ -1,0 +1,22 @@
+FROM golang:latest
+
+WORKDIR /app/src
+
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+
+COPY . .
+
+COPY migrationsx ../migrationsx
+
+RUN go build -o ../testapp cmd/server/main.go
+
+WORKDIR /app
+
+RUN rm -rf src
+
+EXPOSE 8080
+
+CMD [ "/app/testapp" ]
