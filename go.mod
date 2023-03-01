@@ -6,9 +6,9 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/google/uuid v1.3.0
-	github.com/h2non/bimg v1.1.9
 	github.com/joho/godotenv v1.3.0
 	github.com/labstack/echo/v4 v4.10.2
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pkg/errors v0.9.1
 	github.com/streadway/amqp v1.0.0
 	github.com/upper/db/v4 v4.6.0

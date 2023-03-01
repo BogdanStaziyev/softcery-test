@@ -73,7 +73,7 @@ func (i *imageService) DownloadImage(id int64) (string, error) {
 
 func createPath(fileName string, storage string) (string, error) {
 	//Get root path name
-	cwd, _ := os.Getwd()
+	//cwd, _ := os.Getwd()
 
 	//Open current storage or create if not exist
 	_, err := os.Open(storage)
@@ -90,7 +90,7 @@ func createPath(fileName string, storage string) (string, error) {
 
 	//Create a new file name by combining the uuid and the default name. And use "name=" as a delimiter.
 	newFileName := fmt.Sprintf("%sname=%s", uuid.New().String(), fileName)
-	path := filepath.Join(cwd, storage, newFileName)
+	path := filepath.Join(storage, newFileName)
 	newFilePath := filepath.FromSlash(path)
 	return newFilePath, nil
 }
