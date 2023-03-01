@@ -70,7 +70,8 @@ func (r *Rabbit) Consumer() error {
 		for data := range message {
 			mes := string(data.Body)
 			go func() {
-				log.Println(mes)
+
+				//Make variants 75%, 50%, 25% size image
 				err = utils.MakeVariants(mes)
 				if err != nil {
 					log.Println(err)

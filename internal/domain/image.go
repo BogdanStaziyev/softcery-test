@@ -1,6 +1,7 @@
 package domain
 
 type Image struct {
-	ID   int
-	Name string
+	ID          int
+	Path        string
+	ContentType string
 }

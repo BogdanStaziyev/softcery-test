@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"github.com/BogdanStaziyev/softcery-test/internal/app"
+	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/transport/response"
 	"github.com/labstack/echo/v4"
 	"log"
@@ -21,6 +22,7 @@ func NewImageHandler(imageService app.ImageService) ImageHandler {
 }
 
 func (i *ImageHandler) Upload(ctx echo.Context) error {
+	var domainImage domain.Image
 
 	//Get FileHeader the multipart form file
 	image, err := ctx.FormFile("image")
@@ -35,9 +37,9 @@ func (i *ImageHandler) Upload(ctx echo.Context) error {
 		log.Println(err)
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "The format of the submitted file is not supported. The file should be in the format of: .png or .jpeg")
 	}
-
+	domainImage.ContentType = contentType
 	//Upload image to storage and write to DB
-	imageID, err := i.is.UploadImage(image)
+	imageID, err := i.is.UploadImage(image, domainImage)
 	if err != nil {
 		log.Println(err)
 		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
@@ -56,10 +58,10 @@ func (i *ImageHandler) Download(ctx echo.Context) error {
 	quantity := ctx.QueryParam("quantity")
 
 	//Check quantity should be one of 100, 75, 50, 25 by default quantity = 100
-	if quantity == "" {
+	if quantity == "" || quantity == "100" {
 		quantity = "100"
 	} else if quantity != "75" && quantity != "50" && quantity != "25" {
-		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error quantity should to be one of 75%, 50%, 25%")
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error quantity should to be one of 100%, 75%, 50%, 25%")
 	}
 	imageID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -67,9 +69,16 @@ func (i *ImageHandler) Download(ctx echo.Context) error {
 	}
 
 	//Get current path to image
-	path, err := i.is.DownloadImage(imageID, quantity)
+	image, err := i.is.DownloadImage(imageID, quantity)
 	if err != nil {
 		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
 	}
-	return response.Response(ctx, http.StatusOK, path)
+
+	//Return correct image to download
+	ctx.Response().Header().Set("Content-Type", image.ContentType)
+	err = ctx.File(image.Path)
+	if err != nil {
+		return err
+	}
+	return response.Response(ctx, http.StatusOK, nil)
 }

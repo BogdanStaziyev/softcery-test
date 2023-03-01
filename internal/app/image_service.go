@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
 	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
 	"github.com/google/uuid"
@@ -14,8 +15,8 @@ import (
 )
 
 type ImageService interface {
-	UploadImage(image *multipart.FileHeader) (int64, error)
-	DownloadImage(id int64, quantity string) (string, error)
+	UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error)
+	DownloadImage(id int64, quantity string) (domain.Image, error)
 }
 
 type imageService struct {
@@ -32,7 +33,7 @@ func NewImageService(storage string, imageRepo database.ImageRepo, rabbit rabbit
 	}
 }
 
-func (i *imageService) UploadImage(image *multipart.FileHeader) (int64, error) {
+func (i *imageService) UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error) {
 	//Create current path to image storage
 	path, err := createPath(image.Filename, i.storage)
 	if err != nil {
@@ -54,9 +55,9 @@ func (i *imageService) UploadImage(image *multipart.FileHeader) (int64, error) {
 	if _, err = io.Copy(dst, src); err != nil {
 		return 0, err
 	}
-
+	domainImage.Path = path
 	//Save image to DB
-	id, err := i.ir.SaveImage(path)
+	id, err := i.ir.SaveImage(domainImage)
 	if err != nil {
 		return 0, err
 	}
@@ -68,23 +69,35 @@ func (i *imageService) UploadImage(image *multipart.FileHeader) (int64, error) {
 	return id, err
 }
 
-func (i *imageService) DownloadImage(id int64, quantity string) (string, error) {
+func (i *imageService) DownloadImage(id int64, quantity string) (domain.Image, error) {
 	//Getting path to default image from DB
-	path, err := i.ir.GetFullSizePath(id)
+	image, err := i.ir.GetImage(id)
 	if err != nil {
-		return "", err
+		return domain.Image{}, err
 	}
 	switch quantity {
 	case "100":
-		return path, err
+		return image, nil
 	case "75":
-		return returnCurrentPath(path, "0.75")
+		image.Path, err = returnCurrentPath(image.Path, "0.75")
+		if err != nil {
+			return domain.Image{}, err
+		}
+		return image, nil
 	case "50":
-		return returnCurrentPath(path, "0.50")
+		image.Path, err = returnCurrentPath(image.Path, "0.50")
+		if err != nil {
+			return domain.Image{}, err
+		}
+		return image, nil
 	case "25":
-		return returnCurrentPath(path, "0.25")
+		image.Path, err = returnCurrentPath(image.Path, "0.75")
+		if err != nil {
+			return domain.Image{}, err
+		}
+		return image, nil
 	}
-	return "", nil
+	return domain.Image{}, err
 }
 
 func returnCurrentPath(path string, quantity string) (string, error) {
@@ -95,10 +108,11 @@ func returnCurrentPath(path string, quantity string) (string, error) {
 	newPath := fmt.Sprintf("%s%s%s%s", res[0], "name=", quantity, res[1])
 
 	//Check existing file
-	_, err := os.Open(newPath)
+	img, err := os.Open(newPath)
 	if err != nil {
 		return "", err
 	}
+	defer img.Close()
 	return newPath, nil
 }
 
