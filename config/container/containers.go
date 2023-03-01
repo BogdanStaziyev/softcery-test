@@ -2,11 +2,12 @@ package container
 
 import (
 	"github.com/BogdanStaziyev/softcery-test/config"
+	"github.com/BogdanStaziyev/softcery-test/internal/app"
+	"github.com/BogdanStaziyev/softcery-test/internal/infra/handlers"
 	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
 	"log"
-	"time"
 )
 
 type Container struct {
@@ -16,9 +17,11 @@ type Container struct {
 }
 
 type Services struct {
+	app.ImageService
 }
 
 type Controllers struct {
+	handlers.ImageHandler
 }
 
 type Queue struct {
@@ -29,22 +32,29 @@ func New(conf config.Configuration) Container {
 	_ = getDbSess(conf)
 
 	rabbitMQ := rabbit.NewRabbit(conf.RabbitURL)
-	err := rabbitMQ.CreateQueue()
-	if err != nil {
-		log.Println(err)
-	}
-	err = rabbitMQ.PublishImage("hallo, halo")
-	if err != nil {
-		log.Println(err)
-	}
-	time.Sleep(time.Second * 2)
-	err = rabbitMQ.Consumer(conf.FileStorageLocation, "name.png")
-	if err != nil {
-		log.Println(err)
-	}
+	imageService := app.NewImageService(conf.FileStorageLocation)
+	imageHandler := handlers.NewImageHandler(imageService)
+
+	//err := rabbitMQ.CreateQueue()
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//err = rabbitMQ.PublishImage("hallo, halo")
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//time.Sleep(time.Second * 2)
+	//err = rabbitMQ.Consumer(conf.FileStorageLocation, "name.png")
+	//if err != nil {
+	//	log.Println(err)
+	//}
 	return Container{
-		Services:    Services{},
-		Controllers: Controllers{},
+		Services: Services{
+			imageService,
+		},
+		Controllers: Controllers{
+			imageHandler,
+		},
 		Queue: Queue{
 			rabbitMQ,
 		},

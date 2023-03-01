@@ -4,7 +4,7 @@ import (
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/config/container"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
-	http2 "github.com/BogdanStaziyev/softcery-test/internal/infra/http"
+	http2 "github.com/BogdanStaziyev/softcery-test/internal/infra/transport"
 	"github.com/pkg/errors"
 	"log"
 	"os"

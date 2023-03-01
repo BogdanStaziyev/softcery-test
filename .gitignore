@@ -20,3 +20,4 @@ go.work
 .idea
 .vscode
 .env
+file_storage
