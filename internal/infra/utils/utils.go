@@ -39,7 +39,7 @@ func MakeVariants(path string) error {
 		// and preserve aspect ratio
 		m := resize.Resize(uint(result), 0, img, resize.Lanczos3)
 		res := strings.Split(path, "name=")
-		newPath := fmt.Sprintf("%s%s%f%s", res[0], "name=", r, res[1])
+		newPath := fmt.Sprintf("%s%s%.2f%s", res[0], "name=", r, res[1])
 		file, err = os.Create(newPath)
 		if err != nil {
 			return err

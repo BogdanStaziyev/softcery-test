@@ -10,11 +10,12 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ImageService interface {
 	UploadImage(image *multipart.FileHeader) (int64, error)
-	DownloadImage(id int64) (string, error)
+	DownloadImage(id int64, quantity string) (string, error)
 }
 
 type imageService struct {
@@ -67,14 +68,41 @@ func (i *imageService) UploadImage(image *multipart.FileHeader) (int64, error) {
 	return id, err
 }
 
-func (i *imageService) DownloadImage(id int64) (string, error) {
+func (i *imageService) DownloadImage(id int64, quantity string) (string, error) {
+	//Getting path to default image from DB
+	path, err := i.ir.GetFullSizePath(id)
+	if err != nil {
+		return "", err
+	}
+	switch quantity {
+	case "100":
+		return path, err
+	case "75":
+		return returnCurrentPath(path, "0.75")
+	case "50":
+		return returnCurrentPath(path, "0.50")
+	case "25":
+		return returnCurrentPath(path, "0.25")
+	}
 	return "", nil
 }
 
-func createPath(fileName string, storage string) (string, error) {
-	//Get root path name
-	//cwd, _ := os.Getwd()
+func returnCurrentPath(path string, quantity string) (string, error) {
+	//Split base path
+	res := strings.Split(path, "name=")
 
+	//Change base path  to current version
+	newPath := fmt.Sprintf("%s%s%s%s", res[0], "name=", quantity, res[1])
+
+	//Check existing file
+	_, err := os.Open(newPath)
+	if err != nil {
+		return "", err
+	}
+	return newPath, nil
+}
+
+func createPath(fileName string, storage string) (string, error) {
 	//Open current storage or create if not exist
 	_, err := os.Open(storage)
 	if err != nil {

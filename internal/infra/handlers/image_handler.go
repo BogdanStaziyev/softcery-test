@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type ImageHandler struct {
@@ -45,5 +46,30 @@ func (i *ImageHandler) Upload(ctx echo.Context) error {
 }
 
 func (i *ImageHandler) Download(ctx echo.Context) error {
-	return nil
+	//Get image id from query params
+	id := ctx.QueryParams().Get("id")
+	if id == "" {
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "ID field is empty")
+	}
+
+	//Get quantity from query params
+	quantity := ctx.QueryParam("quantity")
+
+	//Check quantity should be one of 100, 75, 50, 25 by default quantity = 100
+	if quantity == "" {
+		quantity = "100"
+	} else if quantity != "75" && quantity != "50" && quantity != "25" {
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error quantity should to be one of 75%, 50%, 25%")
+	}
+	imageID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error ID should be integer")
+	}
+
+	//Get current path to image
+	path, err := i.is.DownloadImage(imageID, quantity)
+	if err != nil {
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+	}
+	return response.Response(ctx, http.StatusOK, path)
 }
