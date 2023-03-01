@@ -1,7 +1,7 @@
 package rabbit
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/pkg"
+	"github.com/BogdanStaziyev/softcery-test/internal/infra/utils"
 	"github.com/streadway/amqp"
 	"log"
 )
@@ -71,7 +71,7 @@ func (r *Rabbit) Consumer() error {
 			mes := string(data.Body)
 			go func() {
 				log.Println(mes)
-				err = pkg.MakeVariants(mes)
+				err = utils.MakeVariants(mes)
 				if err != nil {
 					log.Println(err)
 					return
