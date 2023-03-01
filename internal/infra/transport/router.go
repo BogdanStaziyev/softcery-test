@@ -16,6 +16,6 @@ func EchoRouter(s *Server, cont container.Container) {
 	v1 := e.Group("api/v1")
 	imageGroup := v1.Group("/image")
 
-	imageGroup.POST("/download", cont.Download)
-	imageGroup.GET("/upload/:quantity", cont.ImageHandler.Upload)
+	imageGroup.POST("/download", cont.Upload)
+	imageGroup.GET("/upload/:quantity", cont.ImageHandler.Download)
 }

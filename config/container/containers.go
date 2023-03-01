@@ -3,6 +3,7 @@ package container
 import (
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/app"
+	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/handlers"
 	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
 	"github.com/upper/db/v4"
@@ -29,25 +30,36 @@ type Queue struct {
 }
 
 func New(conf config.Configuration) Container {
-	_ = getDbSess(conf)
+	//PostgreSQL session
+	sess := getDbSess(conf)
 
+	//Create a new connection to RabbitMQ
 	rabbitMQ := rabbit.NewRabbit(conf.RabbitURL)
-	imageService := app.NewImageService(conf.FileStorageLocation)
+
+	//Create queue
+	err := rabbitMQ.CreateQueue()
+	if err != nil {
+		log.Fatalf("RabbitMQ create queue error: %q\n", err)
+	}
+
+	//Create a consumer that continuously reads messages containing image path.
+	//Forwards the path to create different versions of the photo.
+	go func() {
+		err = rabbitMQ.Consumer()
+		if err != nil {
+			log.Fatalf("RabbitMQ consumer error: %q\n", err)
+		}
+	}()
+
+	//Create image repository
+	imageRepo := database.NewImageRepo(sess)
+
+	//Create image service
+	imageService := app.NewImageService(conf.FileStorageLocation, imageRepo, rabbitMQ)
+
+	//Create image handler
 	imageHandler := handlers.NewImageHandler(imageService)
 
-	//err := rabbitMQ.CreateQueue()
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//err = rabbitMQ.PublishImage("hallo, halo")
-	//if err != nil {
-	//	log.Println(err)
-	//}
-	//time.Sleep(time.Second * 2)
-	//err = rabbitMQ.Consumer(conf.FileStorageLocation, "name.png")
-	//if err != nil {
-	//	log.Println(err)
-	//}
 	return Container{
 		Services: Services{
 			imageService,
@@ -61,6 +73,7 @@ func New(conf config.Configuration) Container {
 	}
 }
 
+// Create session with PostgreSQL.
 func getDbSess(conf config.Configuration) db.Session {
 	sess, err := postgresql.Open(
 		postgresql.ConnectionURL{
@@ -74,46 +87,3 @@ func getDbSess(conf config.Configuration) db.Session {
 	}
 	return sess
 }
-
-//func getRabbit(conf config.Configuration) *amqp.Connection {
-//	conn, err := amqp.Dial(conf.RabbitURL)
-//	if err != nil {
-//		log.Fatalf("Unable to create new RabbitMQ connection: %q\n", err)
-//	}
-//	ch, err := conn.Channel()
-//	if err != nil {
-//		log.Fatalf("Unable to create connection sever channel RabbitMQ: %q\n", err)
-//	}
-//	q, err := ch.QueueDeclare("testQueue", false, false, false, false, nil)
-//	if err != nil {
-//		log.Fatalf("Unable to declares a queue RabbitMQ: %q\n", err)
-//	}
-//	fmt.Println(q)
-//	err = ch.Publish("", "testQueue", false, false, amqp.Publishing{
-//		ContentType: "text/plain",
-//		Body:        []byte("hello"),
-//	})
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	return conn
-//}
-//
-//func getConsumer(conf config.Configuration) {
-//	conn, err := amqp.Dial(conf.RabbitURL)
-//	if err != nil {
-//		log.Fatalf("Unable to create new consumer RabbitMQ connection: %q\n", err)
-//	}
-//	ch, err := conn.Channel()
-//	if err != nil {
-//		log.Fatalf("Unable to create connection sever channel consumer RabbitMQ: %q\n", err)
-//	}
-//	msg, err := ch.Consume("testQueue", "", true, false, false, false, nil)
-//	reader := make(chan bool)
-//	go func() {
-//		for d := range msg {
-//			fmt.Printf("message: %s\n", d.Body)
-//		}
-//	}()
-//	<-reader
-//}

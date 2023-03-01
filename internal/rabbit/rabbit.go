@@ -1,6 +1,7 @@
 package rabbit
 
 import (
+	"github.com/BogdanStaziyev/softcery-test/pkg"
 	"github.com/streadway/amqp"
 	"log"
 )
@@ -34,15 +35,17 @@ func (r *Rabbit) CreateQueue() error {
 	return nil
 }
 
-func (r *Rabbit) PublishImage(name string) error {
+func (r *Rabbit) PublishImage(path string) error {
 	ch, err := r.conn.Channel()
 	if err != nil {
 		return err
 	}
 	defer ch.Close()
+
+	//Send current image path to rabbitMQ
 	err = ch.Publish("", queueName, false, false, amqp.Publishing{
 		ContentType: "text/plain",
-		Body:        []byte(name),
+		Body:        []byte(path),
 	})
 	if err != nil {
 		return err
@@ -50,7 +53,7 @@ func (r *Rabbit) PublishImage(name string) error {
 	return nil
 }
 
-func (r *Rabbit) Consumer(path string, imageName string) error {
+func (r *Rabbit) Consumer() error {
 	ch, err := r.conn.Channel()
 	if err != nil {
 		return err
@@ -62,12 +65,17 @@ func (r *Rabbit) Consumer(path string, imageName string) error {
 	}
 	forever := make(chan bool)
 
+	//Read image path and create different quality
 	go func() {
 		for data := range message {
 			mes := string(data.Body)
 			go func() {
 				log.Println(mes)
-				return
+				err = pkg.MakeVariants(mes)
+				if err != nil {
+					log.Println(err)
+					return
+				}
 			}()
 		}
 	}()
