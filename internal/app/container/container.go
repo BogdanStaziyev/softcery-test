@@ -3,7 +3,7 @@ package container
 import (
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/handlers"
+	"github.com/BogdanStaziyev/softcery-test/internal/infra/http/controllers"
 	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
 	"github.com/BogdanStaziyev/softcery-test/internal/service"
 	"github.com/upper/db/v4"
@@ -22,7 +22,7 @@ type Services struct {
 }
 
 type Controllers struct {
-	handlers.ImageHandler
+	controllers.ImageHandler
 }
 
 type Queue struct {
@@ -58,7 +58,7 @@ func New(conf config.Configuration) Container {
 	imageService := service.NewImageService(conf.FileStorageLocation, imageRepo, rabbitMQ)
 
 	//Create image handler
-	imageHandler := handlers.NewImageHandler(imageService)
+	imageHandler := controllers.NewImageHandler(imageService)
 
 	return Container{
 		Services: Services{

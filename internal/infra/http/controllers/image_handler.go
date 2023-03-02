@@ -1,9 +1,9 @@
-package handlers
+package controllers
 
 import (
 	"fmt"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/transport/response"
+	"github.com/BogdanStaziyev/softcery-test/internal/infra/http/response"
 	"github.com/BogdanStaziyev/softcery-test/internal/service"
 	"github.com/labstack/echo/v4"
 	"log"

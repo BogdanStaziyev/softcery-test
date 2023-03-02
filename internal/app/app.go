@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
-	myHttp "github.com/BogdanStaziyev/softcery-test/internal/infra/transport"
+	myHttp "github.com/BogdanStaziyev/softcery-test/internal/infra/http"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"log"
@@ -31,7 +31,7 @@ func Run(conf config.Configuration) {
 		log.Fatalf("storage folder is not available %s", err)
 	}
 
-	//initialize container.go with handlers services and db
+	//initialize container.go with controllers services and db
 	cont := container.New(conf)
 
 	// HTTP Server
