@@ -15,6 +15,8 @@ type Configuration struct {
 	MigrationLocation   string
 	FileStorageLocation string
 	RabbitURL           string
+	LogLevel            string
+	Port                string
 }
 
 func GetConfiguration() Configuration {
@@ -34,6 +36,7 @@ func GetConfiguration() Configuration {
 	if !set {
 		staticFilesLocation = "file_storage"
 	}
+
 	return Configuration{
 		DatabaseName:        os.Getenv("DB_NAME"),
 		DatabaseHost:        os.Getenv("DB_HOST"),
@@ -43,5 +46,6 @@ func GetConfiguration() Configuration {
 		MigrationLocation:   migrationLocation,
 		FileStorageLocation: staticFilesLocation,
 		RabbitURL:           os.Getenv("RABBIT_URL"),
+		Port:                os.Getenv("PORT_SERVER"),
 	}
 }

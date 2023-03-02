@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
-	"github.com/BogdanStaziyev/softcery-test/internal/app"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/transport/response"
+	"github.com/BogdanStaziyev/softcery-test/internal/service"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
@@ -12,10 +12,10 @@ import (
 )
 
 type ImageHandler struct {
-	is app.ImageService
+	is service.ImageService
 }
 
-func NewImageHandler(imageService app.ImageService) ImageHandler {
+func NewImageHandler(imageService service.ImageService) ImageHandler {
 	return ImageHandler{
 		is: imageService,
 	}

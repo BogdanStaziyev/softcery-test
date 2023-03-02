@@ -30,7 +30,7 @@ func MakeVariants(path string) error {
 	//Get image width size
 	sizeX := img.Bounds().Size().X
 
-	//Сreate a slice with all the options for changing the image
+	//Create a slice with all the options for changing the image
 	size := []float32{0.75, 0.5, 0.25}
 	for _, r := range size {
 		result := float32(sizeX) * r

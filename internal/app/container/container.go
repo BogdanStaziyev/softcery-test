@@ -2,10 +2,10 @@ package container
 
 import (
 	"github.com/BogdanStaziyev/softcery-test/config"
-	"github.com/BogdanStaziyev/softcery-test/internal/app"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
 	"github.com/BogdanStaziyev/softcery-test/internal/infra/handlers"
 	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
+	"github.com/BogdanStaziyev/softcery-test/internal/service"
 	"github.com/upper/db/v4"
 	"github.com/upper/db/v4/adapter/postgresql"
 	"log"
@@ -18,7 +18,7 @@ type Container struct {
 }
 
 type Services struct {
-	app.ImageService
+	service.ImageService
 }
 
 type Controllers struct {
@@ -55,7 +55,7 @@ func New(conf config.Configuration) Container {
 	imageRepo := database.NewImageRepo(sess)
 
 	//Create image service
-	imageService := app.NewImageService(conf.FileStorageLocation, imageRepo, rabbitMQ)
+	imageService := service.NewImageService(conf.FileStorageLocation, imageRepo, rabbitMQ)
 
 	//Create image handler
 	imageHandler := handlers.NewImageHandler(imageService)
