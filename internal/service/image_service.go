@@ -94,7 +94,7 @@ func (i *imageService) DownloadImage(id int64, quantity string) (domain.Image, e
 		}
 		return image, nil
 	case "25":
-		image.Path, err = returnCurrentPath(image.Path, "0.75")
+		image.Path, err = returnCurrentPath(image.Path, "0.25")
 		if err != nil {
 			return domain.Image{}, err
 		}
