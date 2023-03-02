@@ -1,17 +1,67 @@
 package http
 
 import (
-	"github.com/labstack/echo/v4"
+	"context"
+	"log"
+	"net/http"
+	"time"
 )
 
+const (
+	_defaultReadTimeout     = 5 * time.Second
+	_defaultWriteTimeout    = 5 * time.Second
+	_defaultShutdownTimeout = 3 * time.Second
+)
+
+// Server - struct server.
 type Server struct {
-	Echo *echo.Echo
+	server          *http.Server
+	notify          chan error
+	shutdownTimeout time.Duration
 }
 
-func NewServer() *Server {
-	return &Server{Echo: echo.New()}
+// New - create mew server instance.
+func New(handler http.Handler, port string) *Server {
+	//If we don't get the port from the environment variables, we use the default port 8080
+	if port == "" {
+		port = ":8080"
+	}
+	httpServer := &http.Server{
+		Handler:      handler,
+		ReadTimeout:  _defaultReadTimeout,
+		WriteTimeout: _defaultWriteTimeout,
+		Addr:         port,
+	}
+
+	s := &Server{
+		server:          httpServer,
+		notify:          make(chan error, 1),
+		shutdownTimeout: _defaultShutdownTimeout,
+	}
+
+	s.start()
+	log.Printf("Server started on port %s", port)
+
+	return s
 }
 
-func (s Server) Start() error {
-	return s.Echo.Start(":8080")
+// Start - It starts the server
+func (s *Server) start() {
+	go func() {
+		s.notify <- s.server.ListenAndServe()
+		close(s.notify)
+	}()
+}
+
+// Notify - return server error notification.
+func (s *Server) Notify() <-chan error {
+	return s.notify
+}
+
+// Shutdown -  gracefully shuts down the HTTP server.
+func (s *Server) Shutdown() error {
+	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
+	defer cancel()
+
+	return s.server.Shutdown(ctx)
 }

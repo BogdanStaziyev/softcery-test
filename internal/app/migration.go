@@ -1,4 +1,4 @@
-package database
+package app
 
 import (
 	"errors"
@@ -14,6 +14,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 )
 
+// Migrate runs migrations for the database using the path specified in the configuration file
 func Migrate(conf config.Configuration) error {
 	if conf.MigrateToVersion == "" {
 		return nil
@@ -21,6 +22,7 @@ func Migrate(conf config.Configuration) error {
 
 	migrationsPath := conf.MigrationLocation
 
+	//Create a folder if it doesn't exist
 	_, err := os.Stat(migrationsPath)
 	if err != nil {
 		log.Printf("Migrate: failed to open '%s' folder, trying to create...\n", migrationsPath)
@@ -67,6 +69,6 @@ func Migrate(conf config.Configuration) error {
 		log.Println("file://" + migrationsPath)
 		return err
 	}
-	log.Println("Migrate: migrations are done successfuly")
+	log.Println("Migrate: migrations are done successfully")
 	return nil
 }

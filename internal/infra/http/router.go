@@ -1,16 +1,21 @@
 package http
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/config/container"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/http/validators"
+	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
+	"github.com/labstack/echo/v4"
 	MW "github.com/labstack/echo/v4/middleware"
 )
 
-func EchoRouter(s *Server, cont container.Container) {
-	e := s.Echo
+// EchoRouter create routes using the Echo router.
+func EchoRouter(e *echo.Echo, cont container.Container) {
+	//Options
 	e.Use(MW.Logger())
+	e.Use(MW.Recover())
 
-	e.Validator = validators.NewValidator()
+	//Routes
+	v1 := e.Group("api/v1")
+	imageGroup := v1.Group("/image")
 
-	_ = e.Group("image")
+	imageGroup.POST("/upload", cont.Upload)
+	imageGroup.GET("/download", cont.ImageHandler.Download)
 }

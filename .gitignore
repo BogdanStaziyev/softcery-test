@@ -19,4 +19,5 @@ go.work
 
 .idea
 .vscode
-.env
+#.env
+file_storage
