@@ -56,6 +56,7 @@ func (i *ImageHandler) Download(ctx echo.Context) error {
 	//Get image id from query params
 	id := ctx.QueryParams().Get("id")
 	if id == "" {
+		log.Println("ID field is empty")
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "ID field is empty")
 	}
 
@@ -66,17 +67,20 @@ func (i *ImageHandler) Download(ctx echo.Context) error {
 	if quantity == "" || quantity == "100" {
 		quantity = "100"
 	} else if quantity != "75" && quantity != "50" && quantity != "25" {
+		log.Printf("Error quantity should to be one of 100, 75, 50, 25, have: %s", quantity)
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error quantity should to be one of 100%, 75%, 50%, 25%")
 	}
 	imageID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
+		log.Println(err)
 		return response.ErrorResponse(ctx, http.StatusBadRequest, "Error ID should be integer")
 	}
 
 	//Get current path to image
 	image, err := i.is.DownloadImage(imageID, quantity)
 	if err != nil {
-		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		log.Println(err)
+		return response.ErrorResponse(ctx, http.StatusInternalServerError, "no such file")
 	}
 
 	//Return correct image to download
