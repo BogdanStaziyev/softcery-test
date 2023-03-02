@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"github.com/nfnt/resize"
 	"image/jpeg"
-	"log"
 	"os"
 	"strings"
 )
 
 // MakeVariants takes the path to an image from RabbitMQ and creates three different versions of the image
 func MakeVariants(path string) error {
-	log.Println(path)
 	// open image
 	file, err := os.Open(path)
 	if err != nil {
