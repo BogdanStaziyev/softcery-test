@@ -8,6 +8,7 @@ services:
       - DB_USER=${DB_USER:-admin}
       - DB_PASSWORD=${DB_PASSWORD:-password}
       - RABBIT_URL=${RABBIT_URL:-amqp://user:password@rabbitmq:5672/}
+      - PORT_SERVER=${PORT_SERVER:-:8080}
     build:
       context: ../
       dockerfile: .docker/dockerfile

@@ -34,6 +34,21 @@ func Run(conf config.Configuration) {
 	//initialize container.go with controllers services and db
 	cont := container.New(conf)
 
+	//Create queue
+	err = cont.Rabbit.CreateQueue()
+	if err != nil {
+		log.Fatalf("RabbitMQ create queue error: %q\n", err)
+	}
+
+	//Create a consumer that continuously reads messages containing image path.
+	//Forwards the path to create different versions of the photo.
+	go func() {
+		err = cont.Rabbit.Consumer()
+		if err != nil {
+			log.Fatalf("RabbitMQ consumer error: %q\n", err)
+		}
+	}()
+
 	// HTTP Server
 	handler := echo.New()
 	myHttp.EchoRouter(handler, cont)

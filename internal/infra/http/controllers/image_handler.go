@@ -21,7 +21,10 @@ func NewImageHandler(imageService service.ImageService) ImageHandler {
 	}
 }
 
+// Upload uploading a new image, we get the image, check the format, and send it to the service layer
 func (i *ImageHandler) Upload(ctx echo.Context) error {
+
+	//Create new image entity
 	var domainImage domain.Image
 
 	//Get FileHeader the multipart form file
@@ -47,6 +50,8 @@ func (i *ImageHandler) Upload(ctx echo.Context) error {
 	return response.MessageResponse(ctx, http.StatusOK, fmt.Sprintf("Image successful upload, id: %d", imageID))
 }
 
+// Download retrieves an image if it exists using query parameters for ID and quantity.
+// Quantity should be 75, 50 or 25 percentages
 func (i *ImageHandler) Download(ctx echo.Context) error {
 	//Get image id from query params
 	id := ctx.QueryParams().Get("id")
@@ -75,10 +80,9 @@ func (i *ImageHandler) Download(ctx echo.Context) error {
 	}
 
 	//Return correct image to download
-	ctx.Response().Header().Set("Content-Type", image.ContentType)
 	err = ctx.File(image.Path)
 	if err != nil {
 		return err
 	}
-	return response.Response(ctx, http.StatusOK, nil)
+	return response.Response(ctx, http.StatusOK, fmt.Sprintf("Content-Type %s", image.ContentType))
 }

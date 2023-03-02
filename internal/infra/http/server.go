@@ -22,6 +22,7 @@ type Server struct {
 
 // New - create mew server instance.
 func New(handler http.Handler, port string) *Server {
+	//If we don't get the port from the environment variables, we use the default port 8080
 	if port == "" {
 		port = ":8080"
 	}
@@ -44,7 +45,7 @@ func New(handler http.Handler, port string) *Server {
 	return s
 }
 
-// Start - Server
+// Start - It starts the server
 func (s *Server) start() {
 	go func() {
 		s.notify <- s.server.ListenAndServe()
@@ -57,7 +58,7 @@ func (s *Server) Notify() <-chan error {
 	return s.notify
 }
 
-// Shutdown - server.
+// Shutdown -  gracefully shuts down the HTTP server.
 func (s *Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
 	defer cancel()

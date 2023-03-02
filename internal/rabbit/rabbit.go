@@ -22,6 +22,7 @@ func NewRabbit(url string) Rabbit {
 	}
 }
 
+// CreateQueue creating a queue using a constant name
 func (r *Rabbit) CreateQueue() error {
 	ch, err := r.conn.Channel()
 	if err != nil {
@@ -35,6 +36,7 @@ func (r *Rabbit) CreateQueue() error {
 	return nil
 }
 
+// PublishImage writes the file path to the queue
 func (r *Rabbit) PublishImage(path string) error {
 	ch, err := r.conn.Channel()
 	if err != nil {
@@ -53,6 +55,7 @@ func (r *Rabbit) PublishImage(path string) error {
 	return nil
 }
 
+// Consumer read the file path and sends the file to create versions with a smaller size
 func (r *Rabbit) Consumer() error {
 	ch, err := r.conn.Channel()
 	if err != nil {
@@ -69,15 +72,12 @@ func (r *Rabbit) Consumer() error {
 	go func() {
 		for data := range message {
 			mes := string(data.Body)
-			go func() {
-
-				//Make variants 75%, 50%, 25% size image
-				err = utils.MakeVariants(mes)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-			}()
+			//Make variants 75%, 50%, 25% size image
+			err = utils.MakeVariants(mes)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 		}
 	}()
 	<-forever

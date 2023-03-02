@@ -11,45 +11,36 @@ import (
 	"log"
 )
 
+// Container holds the values of controller and queue broker services
+// which can be extended with middleware, etc.
 type Container struct {
 	Services
 	Controllers
 	Queue
 }
 
+// Services struct of all services
 type Services struct {
 	service.ImageService
 }
 
+// Controllers struct of all handlers
 type Controllers struct {
 	controllers.ImageHandler
 }
 
+// Queue struct of all queue now we use rabbitMQ
 type Queue struct {
 	rabbit.Rabbit
 }
 
+// New куегкт all the dependencies required for the application to work as described in the above structures
 func New(conf config.Configuration) Container {
 	//PostgreSQL session
 	sess := getDbSess(conf)
 
 	//Create a new connection to RabbitMQ
 	rabbitMQ := rabbit.NewRabbit(conf.RabbitURL)
-
-	//Create queue
-	err := rabbitMQ.CreateQueue()
-	if err != nil {
-		log.Fatalf("RabbitMQ create queue error: %q\n", err)
-	}
-
-	//Create a consumer that continuously reads messages containing image path.
-	//Forwards the path to create different versions of the photo.
-	go func() {
-		err = rabbitMQ.Consumer()
-		if err != nil {
-			log.Fatalf("RabbitMQ consumer error: %q\n", err)
-		}
-	}()
 
 	//Create image repository
 	imageRepo := database.NewImageRepo(sess)
@@ -73,7 +64,7 @@ func New(conf config.Configuration) Container {
 	}
 }
 
-// Create session with PostgreSQL.
+// getDbSess create session with PostgreSQL.
 func getDbSess(conf config.Configuration) db.Session {
 	sess, err := postgresql.Open(
 		postgresql.ConnectionURL{

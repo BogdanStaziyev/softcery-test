@@ -11,5 +11,6 @@ func main() {
 	var conf = config.GetConfiguration()
 	log.Println("Success read config")
 
+	//run application
 	app.Run(conf)
 }

@@ -6,6 +6,7 @@ import (
 	MW "github.com/labstack/echo/v4/middleware"
 )
 
+// EchoRouter create routes using the Echo router.
 func EchoRouter(e *echo.Echo, cont container.Container) {
 	//Options
 	e.Use(MW.Logger())

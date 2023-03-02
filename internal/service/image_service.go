@@ -15,13 +15,16 @@ import (
 )
 
 type ImageService interface {
+	// UploadImage receives a multipart.FileHeader and image entity and copy image to storage.
 	UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error)
+	// DownloadImage receives the image ID and the desired size, sends it to the database.
+	//changes the received path to the desired size
 	DownloadImage(id int64, quantity string) (domain.Image, error)
 }
 
 type imageService struct {
-	ir      database.ImageRepo
 	storage string
+	ir      database.ImageRepo
 	mq      rabbit.Rabbit
 }
 

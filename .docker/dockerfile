@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . .
 
-COPY migrationsx ../migrationsx
+COPY migrations ../migrations
 
 RUN go build -o ../testapp cmd/server/main.go
 

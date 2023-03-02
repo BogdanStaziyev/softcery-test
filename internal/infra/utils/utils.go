@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/nfnt/resize"
 	"image/jpeg"
+	"log"
 	"os"
 	"strings"
 )
 
+// MakeVariants takes the path to an image from RabbitMQ and creates three different versions of the image
 func MakeVariants(path string) error {
+	log.Println(path)
 	// open image
 	file, err := os.Open(path)
 	if err != nil {
@@ -28,22 +31,29 @@ func MakeVariants(path string) error {
 	}
 
 	//Get image width size
-	sizeX := img.Bounds().Size().X
+	width := img.Bounds().Size().X
 
 	//Create a slice with all the options for changing the image
-	size := []float32{0.75, 0.5, 0.25}
-	for _, r := range size {
-		result := float32(sizeX) * r
+	coefficients := []float32{0.75, 0.5, 0.25}
+	for _, c := range coefficients {
 
-		// resize to width 1000 using Lanczos resampling
+		// resize the width of the image
+		result := float32(width) * c
+
+		// resize to width using Lanczos resampling
 		// and preserve aspect ratio
 		m := resize.Resize(uint(result), 0, img, resize.Lanczos3)
+
+		//split the path to the file and specify the coefficient by which the image was resized
 		res := strings.Split(path, "name=")
-		newPath := fmt.Sprintf("%s%s%.2f%s", res[0], "name=", r, res[1])
+		newPath := fmt.Sprintf("%s%s%.2f%s", res[0], "name=", c, res[1])
+
+		// create a new file using the new path with the reduction coefficient
 		file, err = os.Create(newPath)
 		if err != nil {
 			return err
 		}
+
 		// write new image to file
 		err = jpeg.Encode(file, m, nil)
 		if err != nil {
