@@ -1,16 +1,20 @@
+// Package app configures and runs application.
 package app
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/config"
-	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
-	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/v1"
-	"github.com/BogdanStaziyev/softcery-test/pkg/httpserver"
-	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
-	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
+
+	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/v1"
+
+	"github.com/BogdanStaziyev/softcery-test/config"
+	"github.com/BogdanStaziyev/softcery-test/pkg/httpserver"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )
 
 func Run(conf config.Configuration) {
@@ -53,7 +57,7 @@ func Run(conf config.Configuration) {
 
 	// HTTP Server
 	handler := echo.New()
-	v1.EchoRouter(handler, cont, l)
+	v1.EchoRouter(handler, cont.Services, l)
 	httpServer := httpserver.New(handler, conf.Port)
 
 	// Waiting signal

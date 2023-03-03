@@ -2,13 +2,19 @@ package v1
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
+	// echo
+	"github.com/labstack/echo/v4"
+
+	// external
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
+
+	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/response"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/service"
-	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
-	"github.com/labstack/echo/v4"
-	"net/http"
-	"strconv"
 )
 
 type imageHandler struct {

@@ -1,14 +1,19 @@
 package v1
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
-	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
+	// echo
 	"github.com/labstack/echo/v4"
 	MW "github.com/labstack/echo/v4/middleware"
+
+	// internal
+	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
+
+	// external
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )
 
 // EchoRouter create routes using the Echo router.
-func EchoRouter(e *echo.Echo, cont container.Container, l logger.Interface) {
+func EchoRouter(e *echo.Echo, cont container.Services, l logger.Interface) {
 	//Options
 	e.Use(MW.Logger())
 	e.Use(MW.Recover())
@@ -16,6 +21,6 @@ func EchoRouter(e *echo.Echo, cont container.Container, l logger.Interface) {
 	//Routes
 	v1 := e.Group("api/v1")
 	{
-		newImageHandler(v1, cont.Services.ImageService, l)
+		newImageHandler(v1, cont.ImageService, l)
 	}
 }

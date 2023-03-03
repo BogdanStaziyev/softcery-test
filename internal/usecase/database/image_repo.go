@@ -1,7 +1,10 @@
 package database
 
 import (
+	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
+
+	// todo remove addiction
 	"github.com/upper/db/v4"
 )
 
