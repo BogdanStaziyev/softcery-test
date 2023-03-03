@@ -25,15 +25,15 @@ func MakeVariants(path string) error {
 	extension := filepath.Ext(path)
 	var img image.Image
 	switch extension {
-	case ".jpeg":
-		// decode jpeg into image.Image
-		img, err = jpeg.Decode(file)
+	case ".png":
+		// decode png into image.Image
+		img, err = png.Decode(file)
 		if err != nil {
 			return err
 		}
 	default:
-		// decode png into image.Image
-		img, err = png.Decode(file)
+		// decode jpeg into image.Image
+		img, err = jpeg.Decode(file)
 		if err != nil {
 			return err
 		}
