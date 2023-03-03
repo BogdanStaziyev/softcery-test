@@ -5,7 +5,7 @@ package domain
 // Path to the saved image
 // ContentType for proper image retrieval
 type Image struct {
-	ID          int64
-	Path        string
-	ContentType string
+	ID          int64  `db:"id,omitempty"`
+	Path        string `db:"image_path"`
+	ContentType string `db:"content_type"`
 }

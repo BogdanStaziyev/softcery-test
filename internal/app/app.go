@@ -1,23 +1,25 @@
 package app
 
 import (
-	"fmt"
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
-	myHttp "github.com/BogdanStaziyev/softcery-test/internal/infra/http"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/v1"
+	"github.com/BogdanStaziyev/softcery-test/pkg/httpserver"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
 func Run(conf config.Configuration) {
+	l := logger.New("debug")
+
 	//make migration
 	err := Migrate(conf)
 	if err != nil {
-		log.Fatalf("Unable to apply migrations: %s\n", err)
+		l.Fatal("Unable to apply migrations: ", "err", err)
 	}
 
 	//initialize storage location
@@ -25,19 +27,19 @@ func Run(conf config.Configuration) {
 	if errors.Is(err, os.ErrNotExist) {
 		err = os.Mkdir(conf.FileStorageLocation, os.ModePerm)
 		if err != nil {
-			log.Fatalf("storage folder can not be created, %s", err)
+			l.Fatal("storage folder can not be created", "err", err)
 		}
 	} else if err != nil {
-		log.Fatalf("storage folder is not available %s", err)
+		l.Fatal("storage folder is not available", "err", err)
 	}
 
-	//initialize container.go with controllers services and db
-	cont := container.New(conf)
+	//initialize container.go with delete services and db
+	cont := container.New(conf, l)
 
 	//Create queue
 	err = cont.Rabbit.CreateQueue()
 	if err != nil {
-		log.Fatalf("RabbitMQ create queue error: %q\n", err)
+		l.Fatal("RabbitMQ create queue error: ", "err", err)
 	}
 
 	//Create a consumer that continuously reads messages containing image path.
@@ -45,14 +47,14 @@ func Run(conf config.Configuration) {
 	go func() {
 		err = cont.Rabbit.Consumer()
 		if err != nil {
-			log.Fatalf("RabbitMQ consumer error: %q\n", err)
+			l.Fatal("RabbitMQ consumer error: ", "err", err)
 		}
 	}()
 
 	// HTTP Server
 	handler := echo.New()
-	myHttp.EchoRouter(handler, cont)
-	httpServer := myHttp.New(handler, conf.Port)
+	v1.EchoRouter(handler, cont, l)
+	httpServer := httpserver.New(handler, conf.Port)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
@@ -60,14 +62,14 @@ func Run(conf config.Configuration) {
 
 	select {
 	case s := <-interrupt:
-		log.Print("app - Run - signal: " + s.String())
+		l.Error("app - Run - signal: " + s.String())
 	case err = <-httpServer.Notify():
-		log.Print(fmt.Errorf("app - Run - httpServer.Notify: %w", err))
+		l.Error("app - Run - httpServer.Notify: ", "err", err)
 	}
 
 	// Shutdown
 	err = httpServer.Shutdown()
 	if err != nil {
-		log.Print(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+		l.Error("app - Run - httpServer.Shutdown: ", "err", err)
 	}
 }

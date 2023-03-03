@@ -7,12 +7,6 @@ import (
 
 const imageTable = "images"
 
-type image struct {
-	ID          int64  `db:"id,omitempty"`
-	ImagePath   string `db:"image_path"`
-	ContentType string `db:"content_type"`
-}
-
 type ImageRepo interface {
 	// SaveImage accepts an image entity, saves it to the database, creates a unique ID, and returns it
 	SaveImage(image domain.Image) (int64, error)
@@ -31,10 +25,9 @@ func NewImageRepo(dbSession db.Session) ImageRepo {
 }
 
 func (i *imageRepo) SaveImage(image domain.Image) (int64, error) {
-	img := i.mapDomainToImages(image)
 
 	//Insert to db image
-	res, err := i.coll.Insert(&img)
+	res, err := i.coll.Insert(&image)
 	if err != nil {
 		return 0, err
 	}
@@ -42,29 +35,12 @@ func (i *imageRepo) SaveImage(image domain.Image) (int64, error) {
 }
 
 func (i *imageRepo) GetImage(id int64) (domain.Image, error) {
-	var img image
+	var img domain.Image
 
 	//Find one image by id
 	err := i.coll.Find(db.Cond{"id": id}).One(&img)
 	if err != nil {
 		return domain.Image{}, err
 	}
-	return img.mapImageToDomain(), nil
-}
-
-// mapDomainToImages converts the received entity from the upper layer into an image entity for writing to the database
-func (i *imageRepo) mapDomainToImages(img domain.Image) image {
-	return image{
-		ImagePath:   img.Path,
-		ContentType: img.ContentType,
-	}
-}
-
-// mapImageToDomain converts the retrieved entity from the database into an image entity
-func (i *image) mapImageToDomain() domain.Image {
-	return domain.Image{
-		ID:          i.ID,
-		Path:        i.ImagePath,
-		ContentType: i.ContentType,
-	}
+	return img, nil
 }

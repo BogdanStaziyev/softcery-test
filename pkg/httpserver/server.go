@@ -1,4 +1,4 @@
-package http
+package httpserver
 
 import (
 	"context"
@@ -23,9 +23,6 @@ type Server struct {
 // New - create mew server instance.
 func New(handler http.Handler, port string) *Server {
 	//If we don't get the port from the environment variables, we use the default port 8080
-	if port == "" {
-		port = ":8080"
-	}
 	httpServer := &http.Server{
 		Handler:      handler,
 		ReadTimeout:  _defaultReadTimeout,
@@ -39,8 +36,9 @@ func New(handler http.Handler, port string) *Server {
 		shutdownTimeout: _defaultShutdownTimeout,
 	}
 
+	// start server
 	s.start()
-	log.Printf("Server started on port %s", port)
+	log.Printf("Server start on port: %s", port)
 
 	return s
 }

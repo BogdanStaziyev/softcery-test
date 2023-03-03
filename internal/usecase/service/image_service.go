@@ -2,12 +2,12 @@ package service
 
 import (
 	"fmt"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/rabbit"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
-	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 	"github.com/google/uuid"
 	"io"
-	"log"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -24,6 +24,7 @@ type ImageService interface {
 
 type imageService struct {
 	storage string
+	l       logger.Interface
 	ir      database.ImageRepo
 	mq      rabbit.Rabbit
 }
@@ -38,7 +39,7 @@ func NewImageService(storage string, imageRepo database.ImageRepo, rabbit rabbit
 
 func (i *imageService) UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error) {
 	//Create current path to image storage
-	path, err := createPath(image.Filename, i.storage)
+	path, err := i.createPath(image.Filename, i.storage)
 	if err != nil {
 		return 0, err
 	}
@@ -82,19 +83,19 @@ func (i *imageService) DownloadImage(id int64, quantity string) (domain.Image, e
 	case "100":
 		return image, nil
 	case "75":
-		image.Path, err = returnCurrentPath(image.Path, "0.75")
+		image.Path, err = i.returnCurrentPath(image.Path, "0.75")
 		if err != nil {
 			return domain.Image{}, err
 		}
 		return image, nil
 	case "50":
-		image.Path, err = returnCurrentPath(image.Path, "0.50")
+		image.Path, err = i.returnCurrentPath(image.Path, "0.50")
 		if err != nil {
 			return domain.Image{}, err
 		}
 		return image, nil
 	case "25":
-		image.Path, err = returnCurrentPath(image.Path, "0.25")
+		image.Path, err = i.returnCurrentPath(image.Path, "0.25")
 		if err != nil {
 			return domain.Image{}, err
 		}
@@ -103,7 +104,7 @@ func (i *imageService) DownloadImage(id int64, quantity string) (domain.Image, e
 	return domain.Image{}, err
 }
 
-func returnCurrentPath(path string, quantity string) (string, error) {
+func (i *imageService) returnCurrentPath(path string, quantity string) (string, error) {
 	//Split base path
 	res := strings.Split(path, "name=")
 
@@ -119,7 +120,7 @@ func returnCurrentPath(path string, quantity string) (string, error) {
 	return newPath, nil
 }
 
-func createPath(fileName string, storage string) (string, error) {
+func (i *imageService) createPath(fileName string, storage string) (string, error) {
 	//Open current storage or create if not exist
 	_, err := os.Open(storage)
 	if err != nil {
@@ -128,7 +129,7 @@ func createPath(fileName string, storage string) (string, error) {
 			if err != nil {
 				return "", err
 			} else {
-				log.Println("Created new storage")
+				i.l.Info("Created new storage", "usecase - service - createPath")
 			}
 		}
 	}
