@@ -3,8 +3,11 @@ package utils
 import (
 	"fmt"
 	"github.com/nfnt/resize"
+	"image"
 	"image/jpeg"
+	"image/png"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
