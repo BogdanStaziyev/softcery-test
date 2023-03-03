@@ -3,13 +3,14 @@ package main
 import (
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/app"
-	"log"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )
 
 func main() {
+	l := logger.New("main")
 	//initialize configuration
 	var conf = config.GetConfiguration()
-	log.Println("Success read config")
+	l.Info("Success read config")
 
 	//run application
 	app.Run(conf)
