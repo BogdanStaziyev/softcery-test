@@ -2,8 +2,11 @@ package utils
 
 import (
 	"fmt"
+	"image"
 	"image/jpeg"
+	"image/png"
 	"os"
+	"path/filepath"
 	"strings"
 
 	// resize
@@ -18,10 +21,22 @@ func MakeVariants(path string) error {
 		return err
 	}
 
-	// decode jpeg into image.Image
-	img, err := jpeg.Decode(file)
-	if err != nil {
-		return err
+	// Check file format
+	extension := filepath.Ext(path)
+	var img image.Image
+	switch extension {
+	case ".jpeg":
+		// decode jpeg into image.Image
+		img, err = jpeg.Decode(file)
+		if err != nil {
+			return err
+		}
+	default:
+		// decode png into image.Image
+		img, err = png.Decode(file)
+		if err != nil {
+			return err
+		}
 	}
 
 	//Close file
