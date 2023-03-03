@@ -2,20 +2,21 @@ package rabbit
 
 import (
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/utils"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 	"github.com/streadway/amqp"
-	"log"
 )
 
 const queueName = "image"
 
 type Rabbit struct {
 	conn *amqp.Connection
+	l    logger.Interface
 }
 
-func NewRabbit(url string) Rabbit {
+func NewRabbit(url string, l logger.Interface) Rabbit {
 	conn, err := amqp.Dial(url)
 	if err != nil {
-		log.Fatalf("Unable to create new RabbitMQ connection: %q\n", err)
+		l.Fatal("Unable to create new RabbitMQ connection: ", err)
 	}
 	return Rabbit{
 		conn: conn,
@@ -75,7 +76,7 @@ func (r *Rabbit) Consumer() error {
 			//Make variants 75%, 50%, 25% size image
 			err = utils.MakeVariants(mes)
 			if err != nil {
-				log.Println(err)
+				r.l.Error(err, "- rabbit")
 				return
 			}
 		}

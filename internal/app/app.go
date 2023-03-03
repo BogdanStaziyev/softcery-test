@@ -34,7 +34,7 @@ func Run(conf config.Configuration) {
 	}
 
 	//initialize container.go with delete services and db
-	cont := container.New(conf)
+	cont := container.New(conf, l)
 
 	//Create queue
 	err = cont.Rabbit.CreateQueue()
@@ -53,7 +53,7 @@ func Run(conf config.Configuration) {
 
 	// HTTP Server
 	handler := echo.New()
-	v1.EchoRouter(handler, cont)
+	v1.EchoRouter(handler, cont, l)
 	httpServer := httpserver.New(handler, conf.Port)
 
 	// Waiting signal

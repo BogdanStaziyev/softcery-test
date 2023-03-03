@@ -6,6 +6,7 @@ import (
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/service"
 	session "github.com/BogdanStaziyev/softcery-test/pkg/database"
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )
 
 // Container holds the values of controller and queue broker services
@@ -26,7 +27,7 @@ type Queue struct {
 }
 
 // New куегкт all the dependencies required for the application to work as described in the above structures
-func New(conf config.Configuration) Container {
+func New(conf config.Configuration, l logger.Interface) Container {
 	//PostgreSQL session
 	sess := session.NewDbSess(&session.Config{
 		DatabaseUser:     conf.DatabaseUser,
@@ -36,7 +37,7 @@ func New(conf config.Configuration) Container {
 	})
 
 	//Create a new connection to RabbitMQ
-	rabbitMQ := rabbit.NewRabbit(conf.RabbitURL)
+	rabbitMQ := rabbit.NewRabbit(conf.RabbitURL, l)
 
 	//Create image repository
 	imageRepo := database.NewImageRepo(sess)
