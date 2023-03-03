@@ -4,8 +4,8 @@ import (
 	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 
-	// todo remove addiction
-	"github.com/upper/db/v4"
+	// external
+	"github.com/BogdanStaziyev/softcery-test/pkg/database"
 )
 
 const imageTable = "images"
@@ -18,19 +18,19 @@ type ImageRepo interface {
 }
 
 type imageRepo struct {
-	coll db.Collection
+	coll database.PostgreSQL
 }
 
-func NewImageRepo(dbSession db.Session) ImageRepo {
+func NewImageRepo(dbSession *database.PostgreSQL) ImageRepo {
 	return &imageRepo{
-		coll: dbSession.Collection(imageTable),
+		coll: *dbSession,
 	}
 }
 
 func (i *imageRepo) SaveImage(image domain.Image) (int64, error) {
 
 	//Insert to db image
-	res, err := i.coll.Insert(&image)
+	res, err := i.coll.Collection(imageTable).Insert(&image)
 	if err != nil {
 		return 0, err
 	}
@@ -41,7 +41,7 @@ func (i *imageRepo) GetImage(id int64) (domain.Image, error) {
 	var img domain.Image
 
 	//Find one image by id
-	err := i.coll.Find(db.Cond{"id": id}).One(&img)
+	err := i.coll.Collection(imageTable).Find("id", id).One(&img)
 	if err != nil {
 		return domain.Image{}, err
 	}
