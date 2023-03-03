@@ -1,10 +1,15 @@
 package container
 
 import (
+	// config
 	"github.com/BogdanStaziyev/softcery-test/config"
+
+	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/controller/rabbit"
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
 	"github.com/BogdanStaziyev/softcery-test/internal/usecase/service"
+
+	// external
 	session "github.com/BogdanStaziyev/softcery-test/pkg/database"
 	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )

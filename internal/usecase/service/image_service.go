@@ -2,16 +2,20 @@ package service
 
 import (
 	"fmt"
-	"github.com/BogdanStaziyev/softcery-test/internal/controller/rabbit"
-	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
-	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
-	"github.com/google/uuid"
 	"io"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
+
+	// internal
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/rabbit"
+	"github.com/BogdanStaziyev/softcery-test/internal/domain"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
+
+	// external
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
+	"github.com/google/uuid"
 )
 
 type ImageService interface {
