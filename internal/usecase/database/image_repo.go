@@ -1,6 +1,7 @@
 package database
 
 import (
+	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 	"github.com/upper/db/v4"
 )

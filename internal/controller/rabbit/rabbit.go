@@ -1,9 +1,12 @@
 package rabbit
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/internal/usecase/utils"
-	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
+	// rabbit
 	"github.com/streadway/amqp"
+
+	// external
+	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
+	"github.com/BogdanStaziyev/softcery-test/pkg/utils"
 )
 
 const queueName = "image"
