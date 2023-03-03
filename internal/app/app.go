@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/BogdanStaziyev/softcery-test/config"
 	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
-	myHttp "github.com/BogdanStaziyev/softcery-test/internal/infra/http"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/v1"
+	"github.com/BogdanStaziyev/softcery-test/pkg/httpserver"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"log"
@@ -31,7 +32,7 @@ func Run(conf config.Configuration) {
 		log.Fatalf("storage folder is not available %s", err)
 	}
 
-	//initialize container.go with controllers services and db
+	//initialize container.go with delete services and db
 	cont := container.New(conf)
 
 	//Create queue
@@ -51,8 +52,8 @@ func Run(conf config.Configuration) {
 
 	// HTTP Server
 	handler := echo.New()
-	myHttp.EchoRouter(handler, cont)
-	httpServer := myHttp.New(handler, conf.Port)
+	v1.EchoRouter(handler, cont)
+	httpServer := httpserver.New(handler, conf.Port)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

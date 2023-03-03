@@ -1,7 +1,7 @@
 package rabbit
 
 import (
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/utils"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/utils"
 	"github.com/streadway/amqp"
 	"log"
 )

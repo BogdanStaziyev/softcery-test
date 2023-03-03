@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/rabbit"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/database"
-	"github.com/BogdanStaziyev/softcery-test/internal/rabbit"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
 	"github.com/google/uuid"
 	"io"
 	"log"

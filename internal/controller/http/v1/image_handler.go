@@ -1,28 +1,34 @@
-package controllers
+package v1
 
 import (
 	"fmt"
+	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/response"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/infra/http/response"
-	"github.com/BogdanStaziyev/softcery-test/internal/service"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/service"
 	"github.com/labstack/echo/v4"
 	"log"
 	"net/http"
 	"strconv"
 )
 
-type ImageHandler struct {
+type imageHandler struct {
 	is service.ImageService
 }
 
-func NewImageHandler(imageService service.ImageService) ImageHandler {
-	return ImageHandler{
+func newImageHandler(handler *echo.Group, imageService service.ImageService) {
+	r := &imageHandler{
 		is: imageService,
+	}
+
+	h := handler.Group("/")
+	{
+		h.POST("/upload", r.Upload)
+		h.GET("/download", r.Download)
 	}
 }
 
 // Upload uploading a new image, we get the image, check the format, and send it to the service layer
-func (i *ImageHandler) Upload(ctx echo.Context) error {
+func (i *imageHandler) Upload(ctx echo.Context) error {
 
 	//Create new image entity
 	var domainImage domain.Image
@@ -52,7 +58,7 @@ func (i *ImageHandler) Upload(ctx echo.Context) error {
 
 // Download retrieves an image if it exists using query parameters for ID and quantity.
 // Quantity should be 75, 50 or 25 percentages
-func (i *ImageHandler) Download(ctx echo.Context) error {
+func (i *imageHandler) Download(ctx echo.Context) error {
 	//Get image id from query params
 	id := ctx.QueryParams().Get("id")
 	if id == "" {

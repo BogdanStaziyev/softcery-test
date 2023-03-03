@@ -1,4 +1,4 @@
-package http
+package v1
 
 import (
 	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
@@ -14,8 +14,7 @@ func EchoRouter(e *echo.Echo, cont container.Container) {
 
 	//Routes
 	v1 := e.Group("api/v1")
-	imageGroup := v1.Group("/image")
-
-	imageGroup.POST("/upload", cont.Upload)
-	imageGroup.GET("/download", cont.ImageHandler.Download)
+	{
+		newImageHandler(v1, cont.Services.ImageService)
+	}
 }
