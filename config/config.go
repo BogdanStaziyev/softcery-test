@@ -15,7 +15,6 @@ type Configuration struct {
 	MigrationLocation   string
 	FileStorageLocation string
 	RabbitURL           string
-	LogLevel            string
 	Port                string
 }
 
