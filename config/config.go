@@ -18,7 +18,7 @@ type Configuration struct {
 	Port                string
 }
 
-//GetConfiguration returns configuration values from environment variables
+// GetConfiguration returns configuration values from environment variables
 func GetConfiguration() Configuration {
 	//Load .env variables if exists
 	err := godotenv.Load(".env")
