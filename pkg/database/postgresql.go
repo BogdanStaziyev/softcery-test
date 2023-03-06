@@ -11,18 +11,17 @@ import (
 
 type PostgreSQL struct {
 	session db.Session
-	Coll    db.Collection
 	Builder squirrel.StatementBuilderType
 }
 
-type pSQL interface {
+type Database interface {
 	Collection(s string) db.Collection
 }
 
-var _ pSQL = (*PostgreSQL)(nil)
+var _ Database = (*PostgreSQL)(nil)
 
 // NewDbSess create session with PostgreSQL.
-func NewDbSess(conf *Config) *PostgreSQL {
+func NewDbSess(conf *Config) Database {
 	sess, err := postgresql.Open(
 		postgresql.ConnectionURL{
 			User:     conf.DatabaseUser,

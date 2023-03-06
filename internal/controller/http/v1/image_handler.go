@@ -14,15 +14,15 @@ import (
 	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/response"
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
-	"github.com/BogdanStaziyev/softcery-test/internal/usecase/service"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase"
 )
 
 type imageHandler struct {
-	is service.ImageService
+	is usecase.ImageService
 	l  logger.Interface
 }
 
-func newImageHandler(handler *echo.Group, imageService service.ImageService, l logger.Interface) {
+func newImageHandler(handler *echo.Group, imageService usecase.ImageService, l logger.Interface) {
 	r := &imageHandler{
 		is: imageService,
 		l:  l,

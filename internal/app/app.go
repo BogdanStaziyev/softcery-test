@@ -41,17 +41,17 @@ func Run(conf config.Configuration) {
 	cont := container.New(conf, l)
 
 	//Create queue
-	err = cont.Rabbit.CreateQueue()
+	err = cont.Queue.CreateQueue()
 	if err != nil {
-		l.Fatal("RabbitMQ create queue error: ", "err", err)
+		l.Fatal("Queue create queue error: ", "err", err)
 	}
 
 	//Create a consumer that continuously reads messages containing image path.
 	//Forwards the path to create different versions of the photo.
 	go func() {
-		err = cont.Rabbit.Consumer()
+		err = cont.Queue.Consumer()
 		if err != nil {
-			l.Fatal("RabbitMQ consumer error: ", "err", err)
+			l.Fatal("Queue consumer error: ", "err", err)
 		}
 	}()
 
