@@ -1,7 +1,7 @@
-package rabbit
+package queue
 
 import (
-	// rabbit
+	// queue
 	"github.com/streadway/amqp"
 
 	// external
@@ -11,23 +11,23 @@ import (
 
 const queueName = "image"
 
-type Rabbit struct {
+type rabbit struct {
 	conn *amqp.Connection
 	l    logger.Interface
 }
 
-func NewRabbit(url string, l logger.Interface) Rabbit {
+func NewRabbit(url string, l logger.Interface) *rabbit {
 	conn, err := amqp.Dial(url)
 	if err != nil {
 		l.Fatal("Unable to create new RabbitMQ connection: ", err)
 	}
-	return Rabbit{
+	return &rabbit{
 		conn: conn,
 	}
 }
 
 // CreateQueue creating a queue using a constant name
-func (r *Rabbit) CreateQueue() error {
+func (r *rabbit) CreateQueue() error {
 	ch, err := r.conn.Channel()
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (r *Rabbit) CreateQueue() error {
 }
 
 // PublishImage writes the file path to the queue
-func (r *Rabbit) PublishImage(path string) error {
+func (r *rabbit) PublishImage(path string) error {
 	ch, err := r.conn.Channel()
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (r *Rabbit) PublishImage(path string) error {
 }
 
 // Consumer read the file path and sends the file to create versions with a smaller size
-func (r *Rabbit) Consumer() error {
+func (r *rabbit) Consumer() error {
 	ch, err := r.conn.Channel()
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (r *Rabbit) Consumer() error {
 			//Make variants 75%, 50%, 25% size image
 			err = utils.MakeVariants(mes)
 			if err != nil {
-				r.l.Error(err, "- rabbit")
+				r.l.Error(err, "- queue")
 				return
 			}
 		}
