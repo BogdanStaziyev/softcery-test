@@ -6,23 +6,28 @@ import (
 
 	// external
 	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
-	"github.com/BogdanStaziyev/softcery-test/pkg/utils"
+
+	// internal
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase"
 )
 
 const queueName = "image"
 
 type rabbit struct {
 	conn *amqp.Connection
+	str  usecase.Storage
 	l    logger.Interface
 }
 
-func NewRabbit(url string, l logger.Interface) *rabbit {
+func NewRabbit(url string, l logger.Interface, storage usecase.Storage) *rabbit {
 	conn, err := amqp.Dial(url)
 	if err != nil {
 		l.Fatal("Unable to create new RabbitMQ connection: ", err)
 	}
 	return &rabbit{
 		conn: conn,
+		l:    l,
+		str:  storage,
 	}
 }
 
@@ -77,7 +82,7 @@ func (r *rabbit) Consumer() error {
 		for data := range message {
 			mes := string(data.Body)
 			//Make variants 75%, 50%, 25% size image
-			err = utils.MakeVariants(mes)
+			err = r.str.MakeVariants(mes)
 			if err != nil {
 				r.l.Error(err, "- queue")
 				return
