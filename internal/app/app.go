@@ -9,10 +9,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 
-	"github.com/BogdanStaziyev/softcery-test/internal/app/container"
+	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/controller/http/v1"
+	"github.com/BogdanStaziyev/softcery-test/internal/queue"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/database"
+	"github.com/BogdanStaziyev/softcery-test/internal/usecase/storage"
 
+	// external
 	"github.com/BogdanStaziyev/softcery-test/config"
+	session "github.com/BogdanStaziyev/softcery-test/pkg/database"
 	"github.com/BogdanStaziyev/softcery-test/pkg/httpserver"
 	"github.com/BogdanStaziyev/softcery-test/pkg/logger"
 )
@@ -37,11 +43,31 @@ func Run(conf config.Configuration) {
 		l.Fatal("storage folder is not available", "err", err)
 	}
 
-	//initialize container.go with delete services and db
-	cont := container.New(conf, l)
+	// postgreSQL session
+	sess := session.NewDbSess(&session.Config{
+		DatabaseUser:     conf.DatabaseUser,
+		DatabaseName:     conf.DatabaseName,
+		DatabaseHost:     conf.DatabaseHost,
+		DatabasePassword: conf.DatabasePassword,
+	})
+
+	// databases struct of db
+	databases := usecase.Databases{
+		ImageRepo: database.NewImageRepo(sess),
+	}
+
+	// storages struct of storages
+	storages := usecase.Storages{
+		ImageStorage: storage.NewStorage(conf.FileStorageLocation),
+	}
+
+	// queues struct of all services
+	queues := usecase.Queues{
+		RabbitQueue: queue.NewRabbit(conf.RabbitURL, l, storages.ImageStorage),
+	}
 
 	//Create queue
-	err = cont.Queue.CreateQueue()
+	err = queues.RabbitQueue.CreateQueue()
 	if err != nil {
 		l.Fatal("Queue create queue error: ", "err", err)
 	}
@@ -49,15 +75,20 @@ func Run(conf config.Configuration) {
 	//Create a consumer that continuously reads messages containing image path.
 	//Forwards the path to create different versions of the photo.
 	go func() {
-		err = cont.Queue.Consumer()
+		err = queues.RabbitQueue.Consumer()
 		if err != nil {
 			l.Fatal("Queue consumer error: ", "err", err)
 		}
 	}()
 
+	// services struct of all services
+	services := usecase.Services{
+		ImageService: usecase.NewImageService(databases.ImageRepo, queues.RabbitQueue, storages.ImageStorage),
+	}
+
 	// HTTP Server
 	handler := echo.New()
-	v1.EchoRouter(handler, cont.Services, l)
+	v1.EchoRouter(handler, services, l)
 	httpServer := httpserver.New(handler, conf.Port)
 
 	// Waiting signal

@@ -1,53 +1,35 @@
 package usecase
 
 import (
-	"io"
 	"mime/multipart"
-	"os"
 
 	// internal
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 )
 
 type imageService struct {
-	storage string
-	ir      ImageRepo
-	mq      Queue
+	ir  ImageRepo
+	mq  Queue
+	str Storage
 }
 
-func NewImageService(storage string, imageRepo ImageRepo, rabbit Queue) *imageService {
+func NewImageService(imageRepo ImageRepo, rabbit Queue, imageStorage Storage) *imageService {
 	return &imageService{
-		storage: storage,
-		ir:      imageRepo,
-		mq:      rabbit,
+		ir:  imageRepo,
+		mq:  rabbit,
+		str: imageStorage,
 	}
 }
 
-func (i *imageService) UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error) {
-	//Create current path to image storage
-	err := domainImage.CreatePath(image.Filename, i.storage)
+func (i *imageService) UploadImage(image *multipart.FileHeader, domainImage *domain.Image) (int64, error) {
+	//Save image to file storage
+	err := i.str.Save(image, domainImage)
 	if err != nil {
-		return 0, err
-	}
-	src, err := image.Open()
-	if err != nil {
-		return 0, err
-	}
-	defer src.Close()
-
-	//Destination
-	dst, err := os.Create(domainImage.Path)
-	if err != nil {
-		return 0, err
-	}
-
-	//Copy
-	if _, err = io.Copy(dst, src); err != nil {
 		return 0, err
 	}
 
 	//Save image to PostgreSQL
-	id, err := i.ir.SaveImage(domainImage)
+	id, err := i.ir.SaveImage(*domainImage)
 	if err != nil {
 		return 0, err
 	}
@@ -66,28 +48,10 @@ func (i *imageService) DownloadImage(id int64, quantity string) (domain.Image, e
 		return domain.Image{}, err
 	}
 
-	// Find current image by quantity
-	switch quantity {
-	case "100":
-		return image, nil
-	case "75":
-		err = image.ReturnCurrentPath("0.75")
-		if err != nil {
-			return domain.Image{}, err
-		}
-		return image, nil
-	case "50":
-		err = image.ReturnCurrentPath("0.50")
-		if err != nil {
-			return domain.Image{}, err
-		}
-		return image, nil
-	case "25":
-		err = image.ReturnCurrentPath("0.25")
-		if err != nil {
-			return domain.Image{}, err
-		}
-		return image, nil
+	if quantity != "100" {
+		// Find current image by quantity
+		image.ReturnCurrentPath(quantity)
 	}
-	return domain.Image{}, err
+
+	return image, nil
 }
