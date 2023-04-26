@@ -7,9 +7,25 @@ import (
 	"github.com/BogdanStaziyev/softcery-test/internal/domain"
 )
 
+type Databases struct {
+	ImageRepo ImageRepo
+}
+
+type Storages struct {
+	ImageStorage Storage
+}
+
+type Services struct {
+	ImageService ImageService
+}
+
+type Queues struct {
+	RabbitQueue Queue
+}
+
 type ImageService interface {
 	// UploadImage receives a multipart.FileHeader and image entity and copy image to storage.
-	UploadImage(image *multipart.FileHeader, domainImage domain.Image) (int64, error)
+	UploadImage(image *multipart.FileHeader, domainImage *domain.Image) (int64, error)
 	// DownloadImage receives the image ID and the desired size, sends it to the database.
 	//changes the received path to the desired size
 	DownloadImage(id int64, quantity string) (domain.Image, error)
@@ -29,4 +45,11 @@ type Queue interface {
 	CreateQueue() error
 	// Consumer gets the image path and redirects it to create variants
 	Consumer() error
+}
+
+type Storage interface {
+	// Save image in image storage
+	Save(image *multipart.FileHeader, domainImage *domain.Image) error
+	// MakeVariants makes different size of image
+	MakeVariants(path string) error
 }

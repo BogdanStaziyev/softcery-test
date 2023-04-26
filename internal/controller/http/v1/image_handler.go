@@ -56,7 +56,7 @@ func (i *imageHandler) Upload(ctx echo.Context) error {
 	}
 	domainImage.ContentType = contentType
 	//Upload image to storage and write to DB
-	imageID, err := i.is.UploadImage(image, domainImage)
+	imageID, err := i.is.UploadImage(image, &domainImage)
 	if err != nil {
 		i.l.Error(err, "http - v1 - Upload")
 		return response.ErrorResponse(ctx, http.StatusInternalServerError, err.Error())
